@@ -9,31 +9,12 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
         
-        body {
-            font-family: 'Inter', system_ui, sans-serif;
-        }
-        
-        .glass {
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(16px);
-        }
-        
-        .card-hover {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .card-hover:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
-        }
-        
-        .detail-image {
-            cursor: zoom-in;
-            transition: all 0.3s ease;
-        }
-        .detail-image:hover {
-            filter: brightness(1.1);
-        }
+        body { font-family: 'Inter', system_ui, sans-serif; }
+        .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(16px); }
+        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); }
+        .detail-image { cursor: zoom-in; transition: all 0.3s ease; }
+        .detail-image:hover { filter: brightness(1.1); }
     </style>
 </head>
 <body class="bg-zinc-950 text-zinc-100 min-h-screen">
@@ -46,20 +27,15 @@
                 </div>
                 <h1 class="text-2xl font-semibold tracking-tight">俺の娘たち ギャラリー</h1>
             </div>
-            
             <div class="flex items-center gap-x-6">
-                <button onclick="toggleHostMode()" id="host-btn"
-                        class="flex items-center gap-x-2 px-5 py-2.5 rounded-3xl border border-zinc-700 hover:border-violet-400 text-sm font-medium transition-colors">
+                <button onclick="toggleHostMode()" id="host-btn" class="flex items-center gap-x-2 px-5 py-2.5 rounded-3xl border border-zinc-700 hover:border-violet-400 text-sm font-medium transition-colors">
                     <i class="fa-solid fa-user-shield"></i>
                     <span id="host-mode-text">ホストログイン</span>
                 </button>
-                
-                <button onclick="showCreateModal()" id="create-btn"
-                        class="hidden flex items-center gap-x-3 bg-violet-600 hover:bg-violet-700 transition-colors px-6 py-3 rounded-3xl font-medium text-sm">
+                <button onclick="showCreateModal()" id="create-btn" class="hidden flex items-center gap-x-3 bg-violet-600 hover:bg-violet-700 transition-colors px-6 py-3 rounded-3xl font-medium text-sm">
                     <i class="fa-solid fa-plus"></i>
                     <span>新しいセットを作成</span>
                 </button>
-                
                 <div class="flex items-center gap-x-2 text-sm text-zinc-400">
                     <div id="mode-indicator" class="w-2 h-2 bg-zinc-500 rounded-full"></div>
                     <span id="mode-text">閲覧モード</span>
@@ -74,28 +50,29 @@
             <h2 class="text-3xl font-semibold mb-3">まだセットがありません</h2>
             <p class="text-zinc-400 max-w-xs text-center mb-8">ホストモードでログインして、新しいセットを追加しよう</p>
         </div>
-
         <div id="gallery" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8"></div>
     </div>
 
-    <!-- 新規セット作成モーダル（ImgBB短縮URL対応） -->
+    <!-- 新規セット作成モーダル（スクロール対応・ボタン常に見えるように修正） -->
     <div id="create-modal" onclick="if(event.target.id === 'create-modal') hideCreateModal()" 
          class="hidden fixed inset-0 bg-black/70 backdrop-blur-md z-[100] flex items-center justify-center">
         <div onclick="event.stopImmediatePropagation()" 
-             class="bg-zinc-900 rounded-3xl w-full max-w-2xl mx-4 shadow-2xl">
-            <div class="px-8 pt-8 pb-6 border-b border-zinc-800 flex items-center justify-between">
+             class="bg-zinc-900 rounded-3xl w-full max-w-2xl mx-4 shadow-2xl max-h-[90vh] flex flex-col">
+            
+            <div class="px-8 pt-8 pb-6 border-b border-zinc-800 flex items-center justify-between flex-shrink-0">
                 <h3 class="text-2xl font-semibold">新しい4枚セットを作成</h3>
                 <button onclick="hideCreateModal()" class="text-zinc-400 hover:text-white text-3xl leading-none">×</button>
             </div>
             
             <!-- ImgBB案内 -->
-            <div class="mx-8 mt-6 bg-amber-950 border border-amber-400/30 rounded-2xl p-5 text-amber-300 text-sm">
+            <div class="mx-8 mt-6 bg-amber-950 border border-amber-400/30 rounded-2xl p-5 text-amber-300 text-sm flex-shrink-0">
                 📸 <strong>ImgBBで4枚アップロードしたら</strong><br>
                 表示される<strong>URLをそのまま4つ貼り付けてOK</strong>！<br>
                 （https://ibb.co/XXXX 形式でもそのまま使えます）
             </div>
 
-            <div class="px-8 mt-6 space-y-6">
+            <!-- スクロール可能な本文 -->
+            <div class="flex-1 px-8 py-6 space-y-6 overflow-y-auto">
                 <div>
                     <label class="block text-sm font-medium text-zinc-400 mb-1">画像1 URL</label>
                     <input id="img1" type="url" class="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-400 rounded-2xl px-5 py-4 text-zinc-100 placeholder-zinc-500 focus:outline-none" placeholder="https://ibb.co/KjPXX04V">
@@ -119,7 +96,8 @@
                 </div>
             </div>
 
-            <div class="px-8 py-8 flex items-center justify-between border-t border-zinc-800 mt-4">
+            <!-- ボタンエリア（常に下に固定表示） -->
+            <div class="px-8 py-8 flex items-center justify-between border-t border-zinc-800 flex-shrink-0">
                 <button onclick="hideCreateModal()" class="px-8 py-4 text-zinc-400 hover:text-white font-medium">キャンセル</button>
                 <button onclick="createNewSet()" class="bg-violet-600 hover:bg-violet-700 px-10 py-4 rounded-3xl font-semibold flex items-center gap-x-3">
                     <span>セットを追加</span>
@@ -129,11 +107,10 @@
         </div>
     </div>
 
-    <!-- 詳細表示モーダル -->
+    <!-- 詳細モーダル（変更なし） -->
     <div id="detail-modal" onclick="if(event.target.id === 'detail-modal') hideDetailModal()" 
          class="hidden fixed inset-0 bg-black/70 backdrop-blur-md z-[100] flex items-center justify-center">
-        <div onclick="event.stopImmediatePropagation()" 
-             class="bg-zinc-900 rounded-3xl w-full max-w-4xl mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+        <div onclick="event.stopImmediatePropagation()" class="bg-zinc-900 rounded-3xl w-full max-w-4xl mx-4 max-h-[90vh] overflow-hidden flex flex-col">
             <div class="px-8 py-6 border-b border-zinc-800 flex items-center justify-between">
                 <h3 class="text-2xl font-semibold">セット詳細</h3>
                 <div class="flex items-center gap-x-4">
@@ -144,16 +121,13 @@
                     <button onclick="hideDetailModal()" class="text-4xl leading-none text-zinc-400 hover:text-white">×</button>
                 </div>
             </div>
-            
             <div class="p-8 flex-1 overflow-auto">
                 <div id="detail-images" class="grid grid-cols-2 gap-6 mb-10"></div>
-                
                 <div>
                     <label class="block text-sm font-medium text-zinc-400 mb-3">プロンプト</label>
                     <textarea id="detail-prompt" rows="5" class="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-400 rounded-3xl px-6 py-5 text-zinc-100 resize-none focus:outline-none"></textarea>
                 </div>
             </div>
-            
             <div id="detail-actions" class="hidden px-8 py-6 border-t border-zinc-800 flex items-center justify-between">
                 <button onclick="deleteCurrentSet()" class="flex items-center gap-x-3 text-red-400 hover:text-red-500 px-6 py-3 rounded-3xl">
                     <i class="fa-solid fa-trash"></i>
@@ -167,22 +141,16 @@
         </div>
     </div>
 
-    <!-- 画像フルサイズ ポップアップ -->
-    <div id="lightbox" onclick="if(event.target.id === 'lightbox') hideLightbox()" 
-         class="hidden fixed inset-0 bg-black/95 z-[200] flex items-center justify-center backdrop-blur-sm">
+    <!-- ライトボックス -->
+    <div id="lightbox" onclick="if(event.target.id === 'lightbox') hideLightbox()" class="hidden fixed inset-0 bg-black/95 z-[200] flex items-center justify-center backdrop-blur-sm">
         <div class="relative max-w-[95vw] max-h-[95vh]">
-            <button onclick="hideLightbox()" 
-                    class="absolute -top-4 -right-4 bg-zinc-900 text-white w-10 h-10 rounded-2xl flex items-center justify-center text-2xl shadow-xl hover:bg-red-500 transition-colors z-10">
-                ×
-            </button>
-            <img id="lightbox-image" src="" alt="" 
-                 class="max-w-full max-h-[95vh] object-contain rounded-3xl shadow-2xl">
+            <button onclick="hideLightbox()" class="absolute -top-4 -right-4 bg-zinc-900 text-white w-10 h-10 rounded-2xl flex items-center justify-center text-2xl shadow-xl hover:bg-red-500 transition-colors z-10">×</button>
+            <img id="lightbox-image" src="" alt="" class="max-w-full max-h-[95vh] object-contain rounded-3xl shadow-2xl">
         </div>
     </div>
 
     <script>
-        // パスワードをbase64で隠して平文をソースから排除
-        const HOST_PASSWORD_ENCODED = "NzQ1Mw==";   // ← ここを変更したい場合は https://base64encode.org/ で新しいパスワードをエンコードして貼り付けてください
+        const HOST_PASSWORD_ENCODED = "NzQ1Mw=="; // ここを変更したい場合は https://base64encode.org/ でエンコード
 
         let currentSets = [];
         let currentDetailIndex = null;
@@ -200,9 +168,6 @@
             const jsonStr = JSON.stringify(currentSets, null, 2);
             navigator.clipboard.writeText(jsonStr).then(() => {
                 alert('✅ JSONをクリップボードにコピーしました！\n\ndata/gallery-data.json に貼り付けてGitHubに更新してください。');
-            }).catch(() => {
-                console.log(jsonStr);
-                alert('クリップボードコピーに失敗。コンソール（F12）にJSONが出力されています。');
             });
         }
 
@@ -211,18 +176,17 @@
             const modeText = document.getElementById('mode-text');
             const modeIndicator = document.getElementById('mode-indicator');
             const hostBtnText = document.getElementById('host-mode-text');
-            
             if (isHost) {
                 createBtn.classList.remove('hidden');
                 modeText.textContent = 'ホストモード';
-                modeIndicator.classList.remove('bg-zinc-500');
                 modeIndicator.classList.add('bg-emerald-400');
+                modeIndicator.classList.remove('bg-zinc-500');
                 hostBtnText.innerHTML = `<i class="fa-solid fa-right-from-bracket"></i> ログアウト`;
             } else {
                 createBtn.classList.add('hidden');
                 modeText.textContent = '閲覧モード';
-                modeIndicator.classList.remove('bg-emerald-400');
                 modeIndicator.classList.add('bg-zinc-500');
+                modeIndicator.classList.remove('bg-emerald-400');
                 hostBtnText.innerHTML = `<i class="fa-solid fa-user-shield"></i> ホストログイン`;
             }
         }
@@ -238,7 +202,6 @@
                 }
                 return;
             }
-            
             const input = prompt('ホストパスワードを入力してください');
             if (input === atob(HOST_PASSWORD_ENCODED)) {
                 isHost = true;
@@ -253,28 +216,18 @@
         function renderGallery() {
             const container = document.getElementById('gallery');
             const empty = document.getElementById('empty-state');
-            
             container.innerHTML = '';
-            
             if (currentSets.length === 0) {
                 empty.classList.remove('hidden');
                 return;
             }
             empty.classList.add('hidden');
-            
             currentSets.forEach((set, index) => {
-                const cardHTML = `
-                <div onclick="showDetailModal(${index})" class="card-hover bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden cursor-pointer">
+                const cardHTML = `<div onclick="showDetailModal(${index})" class="card-hover bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden cursor-pointer">
                     <div class="grid grid-cols-2 gap-px bg-zinc-800 p-px">
-                    ${set.images.map(img => `
-                        <div class="aspect-square bg-zinc-950 overflow-hidden">
-                            <img src="${img}" class="w-full h-full object-cover hover:scale-110 transition-transform" alt="">
-                        </div>
-                    `).join('')}
+                    ${set.images.map(img => `<div class="aspect-square bg-zinc-950 overflow-hidden"><img src="${img}" class="w-full h-full object-cover hover:scale-110 transition-transform" alt=""></div>`).join('')}
                     </div>
-                    <div class="p-5">
-                        <p class="line-clamp-3 text-sm text-zinc-300 min-h-[72px]">${set.prompt || '<span class="text-zinc-500 italic">プロンプト未設定</span>'}</p>
-                    </div>
+                    <div class="p-5"><p class="line-clamp-3 text-sm text-zinc-300 min-h-[72px]">${set.prompt || '<span class="text-zinc-500 italic">プロンプト未設定</span>'}</p></div>
                 </div>`;
                 container.innerHTML += cardHTML;
             });
@@ -296,22 +249,18 @@
 
         function createNewSet() {
             if (!isHost) return;
-            
             const urls = [
                 document.getElementById('img1').value.trim(),
                 document.getElementById('img2').value.trim(),
                 document.getElementById('img3').value.trim(),
                 document.getElementById('img4').value.trim()
             ];
-            
             if (urls.some(url => !url)) {
                 alert('⚠️ 4枚すべての画像URLを入力してください');
                 return;
             }
-            
             const prompt = document.getElementById('prompt-input').value.trim();
             const newSet = { id: Date.now(), prompt: prompt || '', images: urls };
-            
             currentSets.unshift(newSet);
             saveToStorage();
             hideCreateModal();
@@ -323,20 +272,12 @@
             currentDetailIndex = index;
             const set = currentSets[index];
             if (!set) return;
-            
             const modal = document.getElementById('detail-modal');
             modal.classList.remove('hidden');
-            
             const imageContainer = document.getElementById('detail-images');
-            imageContainer.innerHTML = set.images.map(src => `
-                <div onclick="showLightbox('${src}')" class="detail-image rounded-3xl overflow-hidden border border-zinc-800 aspect-square">
-                    <img src="${src}" class="w-full h-full object-cover">
-                </div>
-            `).join('');
-            
+            imageContainer.innerHTML = set.images.map(src => `<div onclick="showLightbox('${src}')" class="detail-image rounded-3xl overflow-hidden border border-zinc-800 aspect-square"><img src="${src}" class="w-full h-full object-cover"></div>`).join('');
             const promptArea = document.getElementById('detail-prompt');
             promptArea.value = set.prompt || '';
-            
             const actions = document.getElementById('detail-actions');
             if (isHost) {
                 actions.classList.remove('hidden');
@@ -383,9 +324,7 @@
         function copyPrompt() {
             const promptEl = document.getElementById('detail-prompt');
             if (!promptEl.value) return;
-            navigator.clipboard.writeText(promptEl.value).then(() => {
-                showToast('プロンプトをコピーしました 📋');
-            });
+            navigator.clipboard.writeText(promptEl.value).then(() => showToast('プロンプトをコピーしました 📋'));
         }
 
         function showToast(message) {
@@ -393,23 +332,14 @@
             toast.style.cssText = 'position:fixed; bottom:24px; right:24px; background:#10b981; color:white; padding:16px 24px; border-radius:9999px; box-shadow:0 10px 15px -3px rgb(0 0 0 / 0.3); z-index:9999; display:flex; align-items:center; gap:12px; font-weight:500;';
             toast.innerHTML = message;
             document.body.appendChild(toast);
-            setTimeout(() => {
-                toast.style.transition = 'all 0.3s';
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateY(20px)';
-                setTimeout(() => toast.remove(), 300);
-            }, 2800);
+            setTimeout(() => { toast.style.transition = 'all 0.3s'; toast.style.opacity = '0'; toast.style.transform = 'translateY(20px)'; setTimeout(() => toast.remove(), 300); }, 2800);
         }
 
-        // 初期化
         window.onload = function() {
             tailwind.config = { content: [] };
-            
             isHost = localStorage.getItem('isHost') === 'true';
             updateHostUI();
             loadSets();
-            
-            console.log('%c✅ 俺の娘たち 共有ギャラリー（Cloudflare版） が起動しました！', 'color:#a78bfa; font-size:14px');
         };
     </script>
 </body>
