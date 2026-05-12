@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>俺の娘たち ギャラリー</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+        
+        body {
+            font-family: 'Inter', system_ui, sans-serif;
+        }
+        
+        .glass {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(16px);
+        }
+        
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+        }
+        
+        .detail-image {
+            cursor: zoom-in;
+            transition: all 0.3s ease;
+        }
+        .detail-image:hover {
+            filter: brightness(1.1);
+        }
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen">
+    <!-- ヘッダー -->
+    <header class="border-b border-zinc-800 bg-zinc-900/80 glass sticky top-0 z-50">
+        <div class="max-w-screen-2xl mx-auto px-8 py-5 flex items-center justify-between">
+            <div class="flex items-center gap-x-3">
+                <div class="w-10 h-10 rounded-2xl overflow-hidden flex-shrink-0 shadow-inner border border-zinc-700">
+                    <img src="logo.png" alt="俺の娘たち ギャラリー" class="w-full h-full object-cover">
+                </div>
+                <h1 class="text-2xl font-semibold tracking-tight">俺の娘たち ギャラリー</h1>
+            </div>
+            
+            <div class="flex items-center gap-x-6">
+                <button onclick="toggleHostMode()" id="host-btn"
+                        class="flex items-center gap-x-2 px-5 py-2.5 rounded-3xl border border-zinc-700 hover:border-violet-400 text-sm font-medium transition-colors">
+                    <i class="fa-solid fa-user-shield"></i>
+                    <span id="host-mode-text">ホストログイン</span>
+                </button>
+                
+                <button onclick="showCreateModal()" id="create-btn"
+                        class="hidden flex items-center gap-x-3 bg-violet-600 hover:bg-violet-700 transition-colors px-6 py-3 rounded-3xl font-medium text-sm">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>新しいセットを作成</span>
+                </button>
+                
+                <div class="flex items-center gap-x-2 text-sm text-zinc-400">
+                    <div id="mode-indicator" class="w-2 h-2 bg-zinc-500 rounded-full"></div>
+                    <span id="mode-text">閲覧モード</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-screen-2xl mx-auto px-8 py-10">
+        <div id="empty-state" class="hidden flex flex-col items-center justify-center py-24 border border-dashed border-zinc-700 rounded-3xl">
+            <div class="w-24 h-24 flex items-center justify-center text-7xl mb-6 text-zinc-700">📸</div>
+            <h2 class="text-3xl font-semibold mb-3">まだセットがありません</h2>
+            <p class="text-zinc-400 max-w-xs text-center mb-8">ホストモードでログインして、新しいセットを追加しよう</p>
+        </div>
+
+        <div id="gallery" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8"></div>
+    </div>
+
+    <!-- 新規セット作成モーダル（URL入力版） -->
+    <div id="create-modal" onclick="if(event.target.id === 'create-modal') hideCreateModal()" 
+         class="hidden fixed inset-0 bg-black/70 backdrop-blur-md z-[100] flex items-center justify-center">
+        <div onclick="event.stopImmediatePropagation()" 
+             class="bg-zinc-900 rounded-3xl w-full max-w-2xl mx-4 shadow-2xl">
+            <div class="px-8 pt-8 pb-6 border-b border-zinc-800 flex items-center justify-between">
+                <h3 class="text-2xl font-semibold">新しい4枚セットを作成</h3>
+                <button onclick="hideCreateModal()" class="text-zinc-400 hover:text-white text-3xl leading-none">×</button>
+            </div>
+            
+            <div class="px-8 mt-8 space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-zinc-400 mb-1">画像1 URL</label>
+                    <input id="img1" type="url" class="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-400 rounded-2xl px-5 py-4 text-zinc-100 placeholder-zinc-500 focus:outline-none" placeholder="https://i.ibb.co/...">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-zinc-400 mb-1">画像2 URL</label>
+                    <input id="img2" type="url" class="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-400 rounded-2xl px-5 py-4 text-zinc-100 placeholder-zinc-500 focus:outline-none" placeholder="https://i.ibb.co/...">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-zinc-400 mb-1">画像3 URL</label>
+                    <input id="img3" type="url" class="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-400 rounded-2xl px-5 py-4 text-zinc-100 placeholder-zinc-500 focus:outline-none" placeholder="https://i.ibb.co/...">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-zinc-400 mb-1">画像4 URL</label>
+                    <input id="img4" type="url" class="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-400 rounded-2xl px-5 py-4 text-zinc-100 placeholder-zinc-500 focus:outline-none" placeholder="https://i.ibb.co/...">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-zinc-400 mb-2">プロンプト</label>
+                    <textarea id="prompt-input" rows="4" class="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-400 rounded-2xl px-5 py-4 text-zinc-100 resize-none focus:outline-none" placeholder="この4枚の画像を生成したプロンプトを入力..."></textarea>
+                </div>
+            </div>
+
+            <div class="px-8 py-8 flex items-center justify-between border-t border-zinc-800 mt-4">
+                <button onclick="hideCreateModal()" class="px-8 py-4 text-zinc-400 hover:text-white font-medium">キャンセル</button>
+                <button onclick="createNewSet()" class="bg-violet-600 hover:bg-violet-700 px-10 py-4 rounded-3xl font-semibold flex items-center gap-x-3">
+                    <span>セットを追加</span>
+                    <i class="fa-solid fa-check"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 詳細表示モーダル -->
+    <div id="detail-modal" onclick="if(event.target.id === 'detail-modal') hideDetailModal()" 
+         class="hidden fixed inset-0 bg-black/70 backdrop-blur-md z-[100] flex items-center justify-center">
+        <div onclick="event.stopImmediatePropagation()" 
+             class="bg-zinc-900 rounded-3xl w-full max-w-4xl mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+            <div class="px-8 py-6 border-b border-zinc-800 flex items-center justify-between">
+                <h3 class="text-2xl font-semibold">セット詳細</h3>
+                <div class="flex items-center gap-x-4">
+                    <button onclick="copyPrompt()" class="flex items-center gap-x-2 px-5 py-2 text-sm border border-zinc-700 hover:border-zinc-300 rounded-3xl">
+                        <i class="fa-solid fa-copy"></i>
+                        <span>プロンプトをコピー</span>
+                    </button>
+                    <button onclick="hideDetailModal()" class="text-4xl leading-none text-zinc-400 hover:text-white">×</button>
+                </div>
+            </div>
+            
+            <div class="p-8 flex-1 overflow-auto">
+                <div id="detail-images" class="grid grid-cols-2 gap-6 mb-10"></div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-zinc-400 mb-3">プロンプト</label>
+                    <textarea id="detail-prompt" rows="5" class="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-400 rounded-3xl px-6 py-5 text-zinc-100 resize-none focus:outline-none"></textarea>
+                </div>
+            </div>
+            
+            <div id="detail-actions" class="hidden px-8 py-6 border-t border-zinc-800 flex items-center justify-between">
+                <button onclick="deleteCurrentSet()" class="flex items-center gap-x-3 text-red-400 hover:text-red-500 px-6 py-3 rounded-3xl">
+                    <i class="fa-solid fa-trash"></i>
+                    <span>このセットを削除</span>
+                </button>
+                <div class="flex gap-x-4">
+                    <button onclick="hideDetailModal()" class="px-8 py-4 border border-zinc-700 hover:border-zinc-300 rounded-3xl font-medium">閉じる</button>
+                    <button onclick="saveEditedSet()" class="bg-emerald-500 hover:bg-emerald-600 px-10 py-4 rounded-3xl font-semibold">変更を保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 画像フルサイズ ポップアップ -->
+    <div id="lightbox" onclick="if(event.target.id === 'lightbox') hideLightbox()" 
+         class="hidden fixed inset-0 bg-black/95 z-[200] flex items-center justify-center backdrop-blur-sm">
+        <div class="relative max-w-[95vw] max-h-[95vh]">
+            <button onclick="hideLightbox()" 
+                    class="absolute -top-4 -right-4 bg-zinc-900 text-white w-10 h-10 rounded-2xl flex items-center justify-center text-2xl shadow-xl hover:bg-red-500 transition-colors z-10">
+                ×
+            </button>
+            <img id="lightbox-image" src="" alt="" 
+                 class="max-w-full max-h-[95vh] object-contain rounded-3xl shadow-2xl">
+        </div>
+    </div>
+
+    <script>
+        const HOST_PASSWORD = "7453";   // ← ここを好きなパスワードに変更してね！
+
+        let currentSets = [];
+        let currentDetailIndex = null;
+        let isHost = false;
+
+        // データ読み込み（Cloudflare Pages用）
+        async function loadSets() {
+            try {
+                const res = await fetch('/data/gallery-data.json');
+                if (res.ok) {
+                    currentSets = await res.json();
+                } else {
+                    currentSets = [];
+                }
+            } catch (e) {
+                console.log("gallery-data.jsonが見つかりません。最初は空でOKだよ");
+                currentSets = [];
+            }
+            renderGallery();
+        }
+
+        // JSONをクリップボードにコピー（静的サイトなので手動更新用）
+        function saveToStorage() {
+            const jsonStr = JSON.stringify(currentSets, null, 2);
+            navigator.clipboard.writeText(jsonStr).then(() => {
+                alert('✅ JSONデータをクリップボードにコピーしました！\n\n「data/gallery-data.json」に上書きしてGitHubにpushしてください！');
+            }).catch(() => {
+                console.log(jsonStr);
+                alert('クリップボードコピーに失敗したよ。コンソールにJSONが出力されてるから確認してね！');
+            });
+        }
+
+        function updateHostUI() {
+            const createBtn = document.getElementById('create-btn');
+            const modeText = document.getElementById('mode-text');
+            const modeIndicator = document.getElementById('mode-indicator');
+            const hostBtnText = document.getElementById('host-mode-text');
+            
+            if (isHost) {
+                createBtn.classList.remove('hidden');
+                modeText.textContent = 'ホストモード';
+                modeIndicator.classList.remove('bg-zinc-500');
+                modeIndicator.classList.add('bg-emerald-400');
+                hostBtnText.innerHTML = `<i class="fa-solid fa-right-from-bracket"></i> ログアウト`;
+            } else {
+                createBtn.classList.add('hidden');
+                modeText.textContent = '閲覧モード';
+                modeIndicator.classList.remove('bg-emerald-400');
+                modeIndicator.classList.add('bg-zinc-500');
+                hostBtnText.innerHTML = `<i class="fa-solid fa-user-shield"></i> ホストログイン`;
+            }
+        }
+
+        function toggleHostMode() {
+            if (isHost) {
+                if (confirm('ホストモードを終了しますか？')) {
+                    isHost = false;
+                    localStorage.removeItem('isHost');
+                    updateHostUI();
+                    hideDetailModal();
+                    showToast('閲覧モードに戻りました');
+                }
+                return;
+            }
+            
+            const input = prompt('ホストパスワードを入力してください');
+            if (input === HOST_PASSWORD) {
+                isHost = true;
+                localStorage.setItem('isHost', 'true');
+                updateHostUI();
+                showToast('✅ ホストモードに切り替わりました');
+            } else if (input !== null) {
+                alert('❌ パスワードが違います');
+            }
+        }
+
+        function renderGallery() {
+            const container = document.getElementById('gallery');
+            const empty = document.getElementById('empty-state');
+            
+            container.innerHTML = '';
+            
+            if (currentSets.length === 0) {
+                empty.classList.remove('hidden');
+                return;
+            }
+            empty.classList.add('hidden');
+            
+            currentSets.forEach((set, index) => {
+                const cardHTML = `
+                <div onclick="showDetailModal(${index})" class="card-hover bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden cursor-pointer">
+                    <div class="grid grid-cols-2 gap-px bg-zinc-800 p-px">
+                    ${set.images.map(img => `
+                        <div class="aspect-square bg-zinc-950 overflow-hidden">
+                            <img src="${img}" class="w-full h-full object-cover hover:scale-110 transition-transform" alt="">
+                        </div>
+                    `).join('')}
+                    </div>
+                    <div class="p-5">
+                        <p class="line-clamp-3 text-sm text-zinc-300 min-h-[72px]">${set.prompt || '<span class="text-zinc-500 italic">プロンプト未設定</span>'}</p>
+                    </div>
+                </div>`;
+                container.innerHTML += cardHTML;
+            });
+        }
+
+        function showCreateModal() {
+            if (!isHost) return;
+            document.getElementById('create-modal').classList.remove('hidden');
+            // 入力フィールドをクリア
+            document.getElementById('img1').value = '';
+            document.getElementById('img2').value = '';
+            document.getElementById('img3').value = '';
+            document.getElementById('img4').value = '';
+            document.getElementById('prompt-input').value = '';
+        }
+
+        function hideCreateModal() {
+            document.getElementById('create-modal').classList.add('hidden');
+        }
+
+        function createNewSet() {
+            if (!isHost) return;
+            
+            const urls = [
+                document.getElementById('img1').value.trim(),
+                document.getElementById('img2').value.trim(),
+                document.getElementById('img3').value.trim(),
+                document.getElementById('img4').value.trim()
+            ];
+            
+            if (urls.some(url => !url)) {
+                alert('⚠️ 4枚すべての画像URLを入力してください');
+                return;
+            }
+            
+            const prompt = document.getElementById('prompt-input').value.trim();
+            const newSet = { 
+                id: Date.now(), 
+                prompt: prompt || '', 
+                images: urls 
+            };
+            
+            currentSets.unshift(newSet);
+            saveToStorage();
+            hideCreateModal();
+            renderGallery();
+            showToast('新しいセットを追加しました ✓');
+        }
+
+        function showDetailModal(index) {
+            currentDetailIndex = index;
+            const set = currentSets[index];
+            if (!set) return;
+            
+            const modal = document.getElementById('detail-modal');
+            modal.classList.remove('hidden');
+            
+            const imageContainer = document.getElementById('detail-images');
+            imageContainer.innerHTML = set.images.map(src => `
+                <div onclick="showLightbox('${src}')" class="detail-image rounded-3xl overflow-hidden border border-zinc-800 aspect-square">
+                    <img src="${src}" class="w-full h-full object-cover">
+                </div>
+            `).join('');
+            
+            const promptArea = document.getElementById('detail-prompt');
+            promptArea.value = set.prompt || '';
+            
+            const actions = document.getElementById('detail-actions');
+            if (isHost) {
+                actions.classList.remove('hidden');
+                promptArea.removeAttribute('readonly');
+            } else {
+                actions.classList.add('hidden');
+                promptArea.setAttribute('readonly', true);
+            }
+        }
+
+        function hideDetailModal() {
+            document.getElementById('detail-modal').classList.add('hidden');
+            currentDetailIndex = null;
+        }
+
+        function showLightbox(src) {
+            document.getElementById('lightbox-image').src = src;
+            document.getElementById('lightbox').classList.remove('hidden');
+        }
+
+        function hideLightbox() {
+            document.getElementById('lightbox').classList.add('hidden');
+        }
+
+        function saveEditedSet() {
+            if (!isHost || currentDetailIndex === null) return;
+            const newPrompt = document.getElementById('detail-prompt').value.trim();
+            currentSets[currentDetailIndex].prompt = newPrompt;
+            saveToStorage();
+            renderGallery();
+            hideDetailModal();
+            showToast('変更を保存しました');
+        }
+
+        function deleteCurrentSet() {
+            if (!isHost || currentDetailIndex === null || !confirm('本当にこのセットを削除しますか？')) return;
+            currentSets.splice(currentDetailIndex, 1);
+            saveToStorage();
+            renderGallery();
+            hideDetailModal();
+            showToast('セットを削除しました');
+        }
+
+        function copyPrompt() {
+            const promptEl = document.getElementById('detail-prompt');
+            if (!promptEl.value) return;
+            navigator.clipboard.writeText(promptEl.value).then(() => {
+                showToast('プロンプトをコピーしました 📋');
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.style.cssText = 'position:fixed; bottom:24px; right:24px; background:#10b981; color:white; padding:16px 24px; border-radius:9999px; box-shadow:0 10px 15px -3px rgb(0 0 0 / 0.3); z-index:9999; display:flex; align-items:center; gap:12px; font-weight:500;';
+            toast.innerHTML = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.transition = 'all 0.3s';
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(20px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 2800);
+        }
+
+        // 初期化
+        window.onload = function() {
+            // Tailwind
+            tailwind.config = { content: [] };
+            
+            isHost = localStorage.getItem('isHost') === 'true';
+            updateHostUI();
+            loadSets();
+            
+            console.log('%c✅ 俺の娘たち 共有ギャラリー（Cloudflare版） が起動しました！', 'color:#a78bfa; font-size:14px');
+        };
+    </script>
+</body>
+</html>
