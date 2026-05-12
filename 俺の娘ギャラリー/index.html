@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-        
         body { font-family: 'Inter', system_ui, sans-serif; }
         .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(16px); }
         .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -53,7 +52,7 @@
         <div id="gallery" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8"></div>
     </div>
 
-    <!-- 新規セット作成モーダル（スクロール対応・ボタン常に見えるように修正） -->
+    <!-- 新規セット作成モーダル（4枚まとめて貼り付け対応） -->
     <div id="create-modal" onclick="if(event.target.id === 'create-modal') hideCreateModal()" 
          class="hidden fixed inset-0 bg-black/70 backdrop-blur-md z-[100] flex items-center justify-center">
         <div onclick="event.stopImmediatePropagation()" 
@@ -67,36 +66,52 @@
             <!-- ImgBB案内 -->
             <div class="mx-8 mt-6 bg-amber-950 border border-amber-400/30 rounded-2xl p-5 text-amber-300 text-sm flex-shrink-0">
                 📸 <strong>ImgBBで4枚アップロードしたら</strong><br>
-                表示される<strong>URLをそのまま4つ貼り付けてOK</strong>！<br>
-                （https://ibb.co/XXXX 形式でもそのまま使えます）
+                <strong>表示された4つのURLをそのままここに貼り付けて「解析」ボタンを押してください</strong><br>
+                （スペース区切りでも改行でもOK！）
             </div>
 
-            <!-- スクロール可能な本文 -->
+            <!-- まとめて貼り付けエリア -->
             <div class="flex-1 px-8 py-6 space-y-6 overflow-y-auto">
                 <div>
-                    <label class="block text-sm font-medium text-zinc-400 mb-1">画像1 URL</label>
-                    <input id="img1" type="url" class="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-400 rounded-2xl px-5 py-4 text-zinc-100 placeholder-zinc-500 focus:outline-none" placeholder="https://ibb.co/KjPXX04V">
+                    <label class="block text-sm font-medium text-zinc-400 mb-2">4枚URLまとめて貼り付け</label>
+                    <textarea id="bulk-urls" rows="3" 
+                              class="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-400 rounded-2xl px-5 py-4 text-zinc-100 resize-none focus:outline-none"
+                              placeholder="https://ibb.co/KjPXX04V https://ibb.co/BR9xhw8 https://ibb.co/LzNCJN7Q https://ibb.co/zW95VBF3"></textarea>
+                    <button onclick="parseBulkUrls()" 
+                            class="mt-3 w-full bg-zinc-700 hover:bg-zinc-600 px-6 py-3 rounded-2xl text-sm font-medium">
+                        🔄 URLを解析して4つに分ける
+                    </button>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-zinc-400 mb-1">画像2 URL</label>
-                    <input id="img2" type="url" class="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-400 rounded-2xl px-5 py-4 text-zinc-100 placeholder-zinc-500 focus:outline-none" placeholder="https://ibb.co/BR9xhw8">
+
+                <div class="pt-4 border-t border-zinc-700">
+                    <p class="text-xs text-zinc-500 mb-4">または個別に貼り付けてもOK</p>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-zinc-400 mb-1">画像1 URL</label>
+                            <input id="img1" type="url" class="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-400 rounded-2xl px-5 py-4 text-zinc-100 placeholder-zinc-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-zinc-400 mb-1">画像2 URL</label>
+                            <input id="img2" type="url" class="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-400 rounded-2xl px-5 py-4 text-zinc-100 placeholder-zinc-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-zinc-400 mb-1">画像3 URL</label>
+                            <input id="img3" type="url" class="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-400 rounded-2xl px-5 py-4 text-zinc-100 placeholder-zinc-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-zinc-400 mb-1">画像4 URL</label>
+                            <input id="img4" type="url" class="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-400 rounded-2xl px-5 py-4 text-zinc-100 placeholder-zinc-500 focus:outline-none">
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-zinc-400 mb-1">画像3 URL</label>
-                    <input id="img3" type="url" class="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-400 rounded-2xl px-5 py-4 text-zinc-100 placeholder-zinc-500 focus:outline-none" placeholder="https://ibb.co/LzNCJN7Q">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-zinc-400 mb-1">画像4 URL</label>
-                    <input id="img4" type="url" class="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-400 rounded-2xl px-5 py-4 text-zinc-100 placeholder-zinc-500 focus:outline-none" placeholder="https://ibb.co/zW95VBF3">
-                </div>
-                
+
                 <div>
                     <label class="block text-sm font-medium text-zinc-400 mb-2">プロンプト</label>
                     <textarea id="prompt-input" rows="4" class="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-400 rounded-2xl px-5 py-4 text-zinc-100 resize-none focus:outline-none" placeholder="この4枚の画像を生成したプロンプトを入力..."></textarea>
                 </div>
             </div>
 
-            <!-- ボタンエリア（常に下に固定表示） -->
+            <!-- 保存ボタン（常に表示） -->
             <div class="px-8 py-8 flex items-center justify-between border-t border-zinc-800 flex-shrink-0">
                 <button onclick="hideCreateModal()" class="px-8 py-4 text-zinc-400 hover:text-white font-medium">キャンセル</button>
                 <button onclick="createNewSet()" class="bg-violet-600 hover:bg-violet-700 px-10 py-4 rounded-3xl font-semibold flex items-center gap-x-3">
@@ -107,9 +122,8 @@
         </div>
     </div>
 
-    <!-- 詳細モーダル（変更なし） -->
-    <div id="detail-modal" onclick="if(event.target.id === 'detail-modal') hideDetailModal()" 
-         class="hidden fixed inset-0 bg-black/70 backdrop-blur-md z-[100] flex items-center justify-center">
+    <!-- 詳細モーダル・ライトボックス（変更なし） -->
+    <div id="detail-modal" onclick="if(event.target.id === 'detail-modal') hideDetailModal()" class="hidden fixed inset-0 bg-black/70 backdrop-blur-md z-[100] flex items-center justify-center">
         <div onclick="event.stopImmediatePropagation()" class="bg-zinc-900 rounded-3xl w-full max-w-4xl mx-4 max-h-[90vh] overflow-hidden flex flex-col">
             <div class="px-8 py-6 border-b border-zinc-800 flex items-center justify-between">
                 <h3 class="text-2xl font-semibold">セット詳細</h3>
@@ -141,7 +155,6 @@
         </div>
     </div>
 
-    <!-- ライトボックス -->
     <div id="lightbox" onclick="if(event.target.id === 'lightbox') hideLightbox()" class="hidden fixed inset-0 bg-black/95 z-[200] flex items-center justify-center backdrop-blur-sm">
         <div class="relative max-w-[95vw] max-h-[95vh]">
             <button onclick="hideLightbox()" class="absolute -top-4 -right-4 bg-zinc-900 text-white w-10 h-10 rounded-2xl flex items-center justify-center text-2xl shadow-xl hover:bg-red-500 transition-colors z-10">×</button>
@@ -150,7 +163,7 @@
     </div>
 
     <script>
-        const HOST_PASSWORD_ENCODED = "NzQ1Mw=="; // ここを変更したい場合は https://base64encode.org/ でエンコード
+        const HOST_PASSWORD_ENCODED = "NzQ1Mw=="; // パスワード変更時は https://base64encode.org/ でエンコード
 
         let currentSets = [];
         let currentDetailIndex = null;
@@ -236,6 +249,7 @@
         function showCreateModal() {
             if (!isHost) return;
             document.getElementById('create-modal').classList.remove('hidden');
+            document.getElementById('bulk-urls').value = '';
             document.getElementById('img1').value = '';
             document.getElementById('img2').value = '';
             document.getElementById('img3').value = '';
@@ -247,6 +261,27 @@
             document.getElementById('create-modal').classList.add('hidden');
         }
 
+        // ImgBBの4枚URLを一括解析
+        function parseBulkUrls() {
+            const bulk = document.getElementById('bulk-urls').value.trim();
+            if (!bulk) return alert('URLを貼り付けてください');
+            
+            // スペース、改行、タブなどで分割
+            const urls = bulk.split(/\s+/).filter(url => url.length > 10);
+            
+            if (urls.length < 4) {
+                return alert('4枚分のURLを貼り付けてください（現在 ' + urls.length + '個検出）');
+            }
+            
+            // 最初の4つだけ使用
+            document.getElementById('img1').value = urls[0];
+            document.getElementById('img2').value = urls[1];
+            document.getElementById('img3').value = urls[2];
+            document.getElementById('img4').value = urls[3];
+            
+            showToast('✅ 4枚のURLを自動入力しました！');
+        }
+
         function createNewSet() {
             if (!isHost) return;
             const urls = [
@@ -255,12 +290,14 @@
                 document.getElementById('img3').value.trim(),
                 document.getElementById('img4').value.trim()
             ];
+            
             if (urls.some(url => !url)) {
-                alert('⚠️ 4枚すべての画像URLを入力してください');
-                return;
+                return alert('⚠️ 4枚すべての画像URLを入力してください');
             }
+            
             const prompt = document.getElementById('prompt-input').value.trim();
             const newSet = { id: Date.now(), prompt: prompt || '', images: urls };
+            
             currentSets.unshift(newSet);
             saveToStorage();
             hideCreateModal();
@@ -268,6 +305,7 @@
             showToast('新しいセットを追加しました ✓');
         }
 
+        // 以降の関数（showDetailModal, saveEditedSet, deleteCurrentSet, copyPrompt, showToast など）は前の版と同じです
         function showDetailModal(index) {
             currentDetailIndex = index;
             const set = currentSets[index];
