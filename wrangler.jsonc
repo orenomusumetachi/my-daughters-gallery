@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "my-daughters-gallery",
+  "compatibility_date": "2026-05-12",
+  "observability": {
+    "enabled": true
+  },
+  "assets": {
+    "directory": "俺の娘ギャラリー"
+  },
+  "compatibility_flags": [
+    "nodejs_compat"
+  ]
+}
