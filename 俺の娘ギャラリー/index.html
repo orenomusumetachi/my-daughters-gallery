@@ -78,7 +78,7 @@
         <div id="gallery" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8"></div>
     </div>
 
-    <!-- 新規セット作成モーダル（URL入力版） -->
+    <!-- 新規セット作成モーダル（ImgBB短縮URL対応） -->
     <div id="create-modal" onclick="if(event.target.id === 'create-modal') hideCreateModal()" 
          class="hidden fixed inset-0 bg-black/70 backdrop-blur-md z-[100] flex items-center justify-center">
         <div onclick="event.stopImmediatePropagation()" 
@@ -88,22 +88,29 @@
                 <button onclick="hideCreateModal()" class="text-zinc-400 hover:text-white text-3xl leading-none">×</button>
             </div>
             
-            <div class="px-8 mt-8 space-y-6">
+            <!-- ImgBB案内 -->
+            <div class="mx-8 mt-6 bg-amber-950 border border-amber-400/30 rounded-2xl p-5 text-amber-300 text-sm">
+                📸 <strong>ImgBBで4枚アップロードしたら</strong><br>
+                表示される<strong>URLをそのまま4つ貼り付けてOK</strong>！<br>
+                （https://ibb.co/XXXX 形式でもそのまま使えます）
+            </div>
+
+            <div class="px-8 mt-6 space-y-6">
                 <div>
                     <label class="block text-sm font-medium text-zinc-400 mb-1">画像1 URL</label>
-                    <input id="img1" type="url" class="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-400 rounded-2xl px-5 py-4 text-zinc-100 placeholder-zinc-500 focus:outline-none" placeholder="https://i.ibb.co/...">
+                    <input id="img1" type="url" class="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-400 rounded-2xl px-5 py-4 text-zinc-100 placeholder-zinc-500 focus:outline-none" placeholder="https://ibb.co/KjPXX04V">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-zinc-400 mb-1">画像2 URL</label>
-                    <input id="img2" type="url" class="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-400 rounded-2xl px-5 py-4 text-zinc-100 placeholder-zinc-500 focus:outline-none" placeholder="https://i.ibb.co/...">
+                    <input id="img2" type="url" class="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-400 rounded-2xl px-5 py-4 text-zinc-100 placeholder-zinc-500 focus:outline-none" placeholder="https://ibb.co/BR9xhw8">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-zinc-400 mb-1">画像3 URL</label>
-                    <input id="img3" type="url" class="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-400 rounded-2xl px-5 py-4 text-zinc-100 placeholder-zinc-500 focus:outline-none" placeholder="https://i.ibb.co/...">
+                    <input id="img3" type="url" class="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-400 rounded-2xl px-5 py-4 text-zinc-100 placeholder-zinc-500 focus:outline-none" placeholder="https://ibb.co/LzNCJN7Q">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-zinc-400 mb-1">画像4 URL</label>
-                    <input id="img4" type="url" class="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-400 rounded-2xl px-5 py-4 text-zinc-100 placeholder-zinc-500 focus:outline-none" placeholder="https://i.ibb.co/...">
+                    <input id="img4" type="url" class="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-400 rounded-2xl px-5 py-4 text-zinc-100 placeholder-zinc-500 focus:outline-none" placeholder="https://ibb.co/zW95VBF3">
                 </div>
                 
                 <div>
@@ -174,36 +181,28 @@
     </div>
 
     <script>
-        const HOST_PASSWORD = "7453";   // ← ここを好きなパスワードに変更してね！
+        // パスワードをbase64で隠して平文をソースから排除
+        const HOST_PASSWORD_ENCODED = "NzQ1Mw==";   // ← ここを変更したい場合は https://base64encode.org/ で新しいパスワードをエンコードして貼り付けてください
 
         let currentSets = [];
         let currentDetailIndex = null;
         let isHost = false;
 
-        // データ読み込み（Cloudflare Pages用）
         async function loadSets() {
             try {
                 const res = await fetch('/data/gallery-data.json');
-                if (res.ok) {
-                    currentSets = await res.json();
-                } else {
-                    currentSets = [];
-                }
-            } catch (e) {
-                console.log("gallery-data.jsonが見つかりません。最初は空でOKだよ");
-                currentSets = [];
-            }
+                if (res.ok) currentSets = await res.json();
+            } catch(e) {}
             renderGallery();
         }
 
-        // JSONをクリップボードにコピー（静的サイトなので手動更新用）
         function saveToStorage() {
             const jsonStr = JSON.stringify(currentSets, null, 2);
             navigator.clipboard.writeText(jsonStr).then(() => {
-                alert('✅ JSONデータをクリップボードにコピーしました！\n\n「data/gallery-data.json」に上書きしてGitHubにpushしてください！');
+                alert('✅ JSONをクリップボードにコピーしました！\n\ndata/gallery-data.json に貼り付けてGitHubに更新してください。');
             }).catch(() => {
                 console.log(jsonStr);
-                alert('クリップボードコピーに失敗したよ。コンソールにJSONが出力されてるから確認してね！');
+                alert('クリップボードコピーに失敗。コンソール（F12）にJSONが出力されています。');
             });
         }
 
@@ -241,7 +240,7 @@
             }
             
             const input = prompt('ホストパスワードを入力してください');
-            if (input === HOST_PASSWORD) {
+            if (input === atob(HOST_PASSWORD_ENCODED)) {
                 isHost = true;
                 localStorage.setItem('isHost', 'true');
                 updateHostUI();
@@ -284,7 +283,6 @@
         function showCreateModal() {
             if (!isHost) return;
             document.getElementById('create-modal').classList.remove('hidden');
-            // 入力フィールドをクリア
             document.getElementById('img1').value = '';
             document.getElementById('img2').value = '';
             document.getElementById('img3').value = '';
@@ -312,11 +310,7 @@
             }
             
             const prompt = document.getElementById('prompt-input').value.trim();
-            const newSet = { 
-                id: Date.now(), 
-                prompt: prompt || '', 
-                images: urls 
-            };
+            const newSet = { id: Date.now(), prompt: prompt || '', images: urls };
             
             currentSets.unshift(newSet);
             saveToStorage();
@@ -409,7 +403,6 @@
 
         // 初期化
         window.onload = function() {
-            // Tailwind
             tailwind.config = { content: [] };
             
             isHost = localStorage.getItem('isHost') === 'true';
